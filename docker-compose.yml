@@ -1,0 +1,33 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:alpine
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+
+  products:
+    build:
+      dockerfile: Dockerfile
+      context: ./products
+    container_name: products
+    ports:
+      - "8002:8002"
+    restart: always
+    depends_on:
+      - "rabbitmq"
+    volumes:
+      - .:/app
+      - /app/products/node_modules
+    env_file:
+      - ./products/.env.dev
+
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./proxy
+    depends_on:
+      - products
+    ports:
+      - 80:80
+  
